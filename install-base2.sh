@@ -198,7 +198,7 @@ pacman -U $currentmirrorlist
 
 printf "\n[endeavouros]\nSigLevel = PackageRequired\nInclude = /etc/pacman.d/endeavouros-mirrorlist\n\n" >> /etc/pacman.conf
 
-prompt="Important: Did endeavouros-keyring and endeavouros-mirrorlist install correctly [y,n,q] "
+prompt="\n\nImportant: Did endeavouros-keyring and endeavouros-mirrorlist install correctly [y,n,q] "
 simple-yes-no
 
 if [ $returnanswer == "y" ] || [ $returnanswer == "Y" ]
