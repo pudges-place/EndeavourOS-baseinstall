@@ -59,7 +59,7 @@ function uefi-instruction {
    printf "   Partition name: SWAP\n"
    printf "   File System type: linux-swap\n"
    printf "   Start? 230283     (start point of part 4 same as end point of part 3 adjust as nesessary)\n"
-   printf "   End? 238475       (end point same as end point of Free Space from print free command.)\n"
+   printf "   End? 238475       (end same as end point of Free Space from print free command.)\n"
    printf "(parted) print       (should be what you want)\n"
    printf "(parted) quit        (ignore you may need to update /etc/fstab as we haven't made one yet)\n"  
 
