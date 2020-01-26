@@ -313,12 +313,15 @@ sed -i '/PermitEmptyPasswords/c PermitEmptyPasswords no' /etc/ssh/sshd_config
 systemctl disable sshd.service
 systemctl enable sshd.service
 
+su pshare -c "ssh-keygen -t rsa -b 2048"
+
 ufw logging off
 ufw default deny
 ufw enable
 systemctl enable ufw.service
 
 rm /root/install-base2.sh
+rm /root/device-name
 
 printf "\n\nInstallation is complete.\n\n"
 printf "Pressing any key will exit arch-chroot and terminate the script.\n"
