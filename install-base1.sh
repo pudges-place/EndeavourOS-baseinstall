@@ -262,6 +262,12 @@ let verify="e"
 let basedevel="f"
 let lts="g"
 
+if [ $(id -u) -ne 0 ]
+then
+   printf "\nPLEASE RUN THIS SCRIPT WITH sudo\n\n"
+   exit
+fi
+
 printf "\033c"; printf "\n"
 printf "This script is meant for installation in a \"Bare Metal\" situation.\n"
 printf "It does not provide for dual booting with another OS.\n"
