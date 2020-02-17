@@ -246,13 +246,13 @@ printf "\nSETTING UP THE STATIC IP ADDRESS FOR THE SERVER\n"
 finished=1
 while [ $finished -ne 0 ]
 do
-   printf "\nThe last triad should be between 100 and 245\n"   
-   printf "Enter the last triad of the desired static IP address $threetriads"
+   printf "\nThe last octet should be between 101 and 250\n"   
+   printf "Enter the last octet of the desired static IP address $threetriads"
    read lasttriad
    staticip=$threetriads$lasttriad
    printf "you entered $staticip is that correct? [y/n] "
    read z
-   if [ $lasttriad -lt 100 ] || [ $lasttriad -gt 245 ]
+   if [ $lasttriad -lt 101 ] || [ $lasttriad -gt 250 ]
    then
       printf "\nYour choice is out of range"
       z=n
