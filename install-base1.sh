@@ -261,6 +261,12 @@ let message="d"
 let verify="e"
 let basedevel="f"
 let lts="g"
+# Declare color variables
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+# Create log file
+export logfile="`mktemp`"
 
 if [ $(id -u) -ne 0 ]
 then
@@ -308,15 +314,26 @@ yes-no-input       # function call
 
 
 
-printf "\033c"; printf "\nCheck Internet Connection\n"
-ping -c 3 endeavouros.com
-printf "\n"
-prompt="Do you see \"3 packets transmitted, 3 recieved, 0 packet loss\" [y,n] "
-message="\nThe ping command failed, check network status\n"
-verify="false"
-yes-no-input
+printf "\033c"; printf "\nChecking Internet Connection...   " 
+ping -c 3 endeavouros.com &> $logfile
+status=$?
+if [[ $status -eq 0 ]]
+then
+  printf "${GREEN}OK${NC}\n"
+else
+  printf "${RED}ERROR${NC}\n\n Please verify your internet connection \n"
+  printf " Logs are stored in: $(realpath $logfile) \n"
+  exit 1
+fi
+sleep 1
 
-printf "\033c"; printf "\nEnable NTP\n\n"
+printf "\n"
+#prompt="Do you see \"3 packets transmitted, 3 recieved, 0 packet loss\" [y,n] "
+#message="\nThe ping command failed, check network status\n"
+#verify="false"
+#yes-no-input
+
+printf "\nEnable NTP\n\n"
 timedatectl set-ntp true
 printf "Timedatectl status\n" 
 timedatectl status
@@ -405,5 +422,8 @@ cp install-base2.sh /mnt/root/
 printf "Entering arch-chroot\n\n"
 
 arch-chroot /mnt /root/install-base2.sh
+
+# Cleanup logfile
+rm -f $logfile
 
 exit
