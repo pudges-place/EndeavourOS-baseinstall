@@ -1,0 +1,49 @@
+
+    Script should check at beginning whether it was run with superuser priviliges
+
+    Assistance with parted - could actually count how much space you may assign to partitions
+
+    In my case parted was unable to inform kernel with partition changes, partprobe didn’t work either,
+    so I had to reboot - but that’s out of the script scope.
+
+    Why ping isn’t self checking for success and prompting user for input?
+
+    NTP - same as above
+
+    Script isn’t checking the /dev/sdx existence, instead it tries to perform install on whatever
+    you type (except for /dev/ path). I put /dev/sds (which in real life could be a typo from /dev/sda,
+    and user will just pass y in next question just to move on) and script tried to install on non-existing drive
+    a) it should either check for device existence and correct partitioning
+    b) or script should break right after first failed command, as this mean something is wrong and
+     install won’t succeed anyway.
+
+    Script shouldn’t print output of commands, instead it could ptint nice colored output like:
+    formatting SWAP partition... OK
+    etc
+
+    Automatic partitioning would be nice with single question on which device to use - selecting by
+    nice name (e.g. producent and model + /dev/sdx path), with option to choose if you’d like to
+    perform manual install.
+
+    Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
+
+    Again no self-check (above)
+
+    TZ should be selected automatically if there is only one tz in country
+
+    ‘Is this correct’ questions are annoying when you see them for n’th time even when setting
+    hostname - which is not that mission-critial (or it is in later steps?)
+
+    Again perform autocheck of mirrorlist and keyring install success.
+
+    parse output from installation of git etc. It looks like pacman is prompting user for interaction
+   ( Proceed with installation? [Y/n] )
+
+    Why last octet of ip address? and why limited from 100 to 245?
+
+    Why there is start job waiting for /sys/subsystem/net/devices/wlan0 ?
+
+    There could be question about any other packages that user may want to install before reboot.
+    I hadn’t ‘dialog’ installed, which made wifi-menu unavailable and I was effectively without
+    network after reboot.
+.
