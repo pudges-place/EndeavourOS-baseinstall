@@ -249,7 +249,7 @@ done
 }    # end of function yes-no-input
 
 function ok-nok {
-# Requires that variables "message-ok" and "message-nok" be set
+# Requires that variables "message" be set
 status=$?
 
 if [[ $status -eq 0 ]]
