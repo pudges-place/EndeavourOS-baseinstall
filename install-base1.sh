@@ -248,6 +248,21 @@ done
 
 }    # end of function yes-no-input
 
+function ok-nok {
+# Requires that variables "message" be set
+status=$?
+
+if [[ $status -eq 0 ]]
+then
+  printf "${GREEN}OK${NC}\n"
+else
+  printf "${RED}ERROR${NC}\n\n $message\n"
+  printf " Logs are stored in: $(realpath $logfile) \n"
+  exit 1
+fi
+sleep 1
+}	# end of function ok-nok
+
 ###############################################
 # starting point for script 1
 ###############################################
@@ -261,6 +276,12 @@ let message="d"
 let verify="e"
 let basedevel="f"
 let lts="g"
+# Declare color variables
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+# Create log file
+export log="`mktemp`"
 
 if [ $(id -u) -ne 0 ]
 then
@@ -307,24 +328,20 @@ verify="false"
 yes-no-input       # function call
 
 
+printf "\033c"; printf "\nChecking Internet Connection...   " 
+ping -c 3 endeavouros.com -W 5 &> $log
+message="Please verify your internet connection \n"
+ok-nok		# function call
+sleep 1
 
-printf "\033c"; printf "\nCheck Internet Connection\n"
-ping -c 3 endeavouros.com
-printf "\n"
-prompt="Do you see \"3 packets transmitted, 3 recieved, 0 packet loss\" [y,n] "
-message="\nThe ping command failed, check network status\n"
-verify="false"
-yes-no-input
+printf "\nEnabling NTP...    "
+timedatectl set-ntp true &> $log
+timedatectl timesync-status &> $log
+message="Please verify your internet connection and ntp settings\n"
+ok-nok		# function call
+sleep 1
 
-printf "\033c"; printf "\nEnable NTP\n\n"
-timedatectl set-ntp true
-printf "Timedatectl status\n" 
-timedatectl status
 printf "\n"
-prompt="Does \"NTP service: active\" appear in status output? [y,n] "
-message="\nThe command \"timedatectl set-ntp true\" failed\n"
-verify="false"
-yes-no-input
 
 
 xyz="0"
@@ -405,5 +422,8 @@ cp install-base2.sh /mnt/root/
 printf "Entering arch-chroot\n\n"
 
 arch-chroot /mnt /root/install-base2.sh
+
+# Cleanup logfile
+rm -f $logfile
 
 exit
