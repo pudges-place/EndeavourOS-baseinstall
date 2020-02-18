@@ -1,48 +1,18 @@
 
- 0  FIXED & PULLED Script should check at beginning whether it was run with superuser priviliges
-
- 1  PUDGE WORKING ON (1 5 & 7 ARE RELATED) Assistance with parted - could actually count how much space you may assign to partitions
-
- 2  In my case parted was unable to inform kernel with partition changes, partprobe didn’t work either,
-    so I had to reboot - but that’s out of the script scope.
-
- 3  FIXED & PULLED Why ping isn’t self checking for success and prompting user for input?
-
- 4  FIXED & PULLED NTP - same as above
-
- 5 PUDGE WORKING ON  Script isn’t checking the /dev/sdx existence, instead it tries to perform install on whatever
-   you type (except for /dev/ path). I put /dev/sds (which in real life could be a typo from /dev/sda,
-   and user will just pass y in next question just to move on) and script tried to install on non-existing drive
-   a) it should either check for device existence and correct partitioning
-   b) or script should break right after first failed command, as this mean something is wrong and
-   install won’t succeed anyway.
-
- 6  Script shouldn’t print output of commands, instead it could ptint nice colored output like:
-   formatting SWAP partition... OK  etc.
-
- 7  PUDGE WORKING ON Automatic partitioning would be nice with single question on which device to use - selecting by
-    nice name (e.g. producent and model + /dev/sdx path), with option to choose if you’d like to
-    perform manual install.
-
- 8  Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
-
- 9  Again no self-check (above)
-
-10  TZ should be selected automatically if there is only one tz in country
-
-11  ‘Is this correct’ questions are annoying when you see them for n’th time even when setting
-    hostname - which is not that mission-critial (or it is in later steps?)
-
-12  Again perform autocheck of mirrorlist and keyring install success.
-
-13  parse output from installation of git etc. It looks like pacman is prompting user for interaction
-    ( Proceed with installation? [Y/n] )
-
-14  AMENDED BY PUDGE, STILL NEEDS MORE DISCUSSION Why last octet of ip address? and why limited from 100 to 245?
-
-15  Why there is start job waiting for /sys/subsystem/net/devices/wlan0 ?
-
-16 There could be question about any other packages that user may want to install before reboot.
-   I hadn’t ‘dialog’ installed, which made wifi-menu unavailable and I was effectively without
-   network after reboot.
-.
+ [x] Script should check at beginning whether it was run with superuser priviliges
+ [ ] 1  PUDGE WORKING ON (1 5 & 7 ARE RELATED) Assistance with parted - count & display how much space you may assign to partitions
+ [ ] 2  Investigate why in some cases parted is unable to inform kernel of new partition table
+ [x] 3  Network connection - create self test and nice output
+ [x] 4  NTP - same as above
+ [ ] 5 PUDGE WORKING ON  Check if /dev/sdx exist or break script after first failed command
+ [ ] 6  PATBEL WORKING ON IT Print commands output in nice way
+ [ ] 7  PUDGE WORKING ON Automatic partitioning with single question on which device to use - selecting by nice name (e.g. producent and model + /dev/sdx path), with option to choose if you’d like to perform manual install.
+ [ ] 8  Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
+ [ ] 9  Self check if country code is correct
+ [ ] 10  TZ should be selected automatically if there is only one tz in country
+ [ ] 11  Tinker on `Is this correct` questions
+ [ ] 12  Perform autocheck of mirrorlist and keyring install success.
+ [ ] 13  Parse output from pacman 
+ [ ] 14  AMENDED BY PUDGE, STILL NEEDS MORE DISCUSSION Why last octet of ip address? and why limited from 100 to 245?
+ [ ] 15  PATBEL WORKING ON IT Why after reboot there is start job waiting for /sys/subsystem/net/devices/wlan0 ?
+ [ ] 16  Ask user if he would like to install additional packages
