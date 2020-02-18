@@ -328,36 +328,20 @@ verify="false"
 yes-no-input       # function call
 
 
-
 printf "\033c"; printf "\nChecking Internet Connection...   " 
 ping -c 3 endeavouros.com -W 5 &> $log
 message="Please verify your internet connection \n"
-ok-nok
+ok-nok		# function call
 sleep 1
-
-#prompt="Do you see \"3 packets transmitted, 3 recieved, 0 packet loss\" [y,n] "
-#message="\nThe ping command failed, check network status\n"
-#verify="false"
-#yes-no-input
 
 printf "\nEnabling NTP...    "
 timedatectl set-ntp true &> $log
 timedatectl timesync-status &> $log
 message="Please verify your internet connection and ntp settings\n"
-ok-nok
+ok-nok		# function call
 sleep 1
 
 printf "\n"
-
-# verify if ntp is working
-
-#printf "Timedatectl status\n" 
-#timedatectl status
-#printf "\n"
-#prompt="Does \"NTP service: active\" appear in status output? [y,n] "
-#message="\nThe command \"timedatectl set-ntp true\" failed\n"
-#verify="false"
-#yes-no-input
 
 
 xyz="0"
