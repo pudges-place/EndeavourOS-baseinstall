@@ -236,8 +236,8 @@ done
 
 # setup static IP address with user supplied static IP
 
-ethernetdevice=$( ip r | awk 'NR==1{print $5}')
-routerip=$( ip r | awk 'NR==1{print $3}')
+ethernetdevice=$(ip r | awk 'NR==1{print $5}')
+routerip=$(ip r | awk 'NR==1{print $3}')
 
 threetriads=$routerip
 xyz=${threetriads#*.*.*.}
