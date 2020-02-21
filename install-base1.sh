@@ -37,6 +37,21 @@ function headerend {
    fi
 }
 
+function ok-nok {
+# Requires that variables "message" be set
+status=$?
+if [[ $status -eq 0 ]]
+then
+  printf "${GREEN}OK${NC}\n"
+else
+  printf "${RED}ERROR${NC}\n\n $message\n"
+  printf " Logs are stored in: $(realpath $logfile) \n"
+  exit 1
+fi
+sleep 1
+}	# end of function ok-nok
+
+
 function uefi-auto-partition {
  parted --script -a optimal /$devicename \
    mklabel gpt \
@@ -154,12 +169,16 @@ do
 
     ##### Call appropriate auto partition function ####
     printf "\033c"
-    printf "\nPartioning $devicename "
+    printf "\nPartioning $devicename...   "
     if [ $uefibootstatus -eq 1 ]
     then
       uefi-auto-partition  # function call
+      message="FAILED"
+      ok-nok  # function call
     else
       bios-auto-partition  # function call
+      message="FAILED"
+      ok-nok  #function call
     fi
 done
 }   # end of function autopartition
@@ -304,20 +323,6 @@ done
 
 }    # end of function yes-no-input
 
-function ok-nok {
-# Requires that variables "message" be set
-status=$?
-
-if [[ $status -eq 0 ]]
-then
-  printf "${GREEN}OK${NC}\n"
-else
-  printf "${RED}ERROR${NC}\n\n $message\n"
-  printf " Logs are stored in: $(realpath $logfile) \n"
-  exit 1
-fi
-sleep 1
-}	# end of function ok-nok
 
 ###############################################
 # starting point for script 1
