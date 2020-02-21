@@ -1,6 +1,7 @@
 #! /bin/bash
 
 function uefi-header {
+   printf "\033c"
    printf "The EndeavourOS Live install ISO has been started in the UEFI mode\n"
    printf "For a UEFI install, create a gpt partition table with 4 partitions as follows:\n\n"
    printf "Partition Table: gpt\n"
@@ -9,10 +10,11 @@ function uefi-header {
    printf " 2      1388MB  2462MB  1074MB  ext4            BOOT\n"
    printf " 3      2462MB  241GB   239GB   ext4            ROOT\n"
    printf " 4      241GB   250GB   8677MB  linux-swap(v1)  SWAP\n\n"
-   printf "Only File Format  ext4 is allowed for /boot and / \n\n"
+   printf "Only File Format ext4 is allowed for /boot and / \n\n"
 }    # end of function uefi-header
 
 function bios-header {
+   printf "\033c"
    printf "The EndeavourOS Live install ISO has been started in the msdos mode\n"
    printf "For a msdos install, create a msdos partition table with 3 partitions as follows:\n\n"
    printf "Partition Table: msdos\n"
@@ -20,7 +22,7 @@ function bios-header {
    printf " 1      1049kb  1075MB	1074MB  primary  ext4         boot\n"
    printf " 2      1075MB  241GB   240GB   primary  ext4\n"
    printf " 3      241GB   250GB   8860MB  primary  linux-swap(v1)\n\n"
-   printf "Only File Format  ext4 is allowed for /boot and / \n\n"
+   printf "Only File Format ext4 is allowed for /boot and / \n\n"
 }     # end of function bios-header
 
 function headerend {
