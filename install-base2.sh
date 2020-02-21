@@ -313,10 +313,6 @@ sed -i '/PermitEmptyPasswords/c PermitEmptyPasswords no' /etc/ssh/sshd_config
 systemctl disable sshd.service
 systemctl enable sshd.service
 
-# printf "\n\nGenerating SSH keys\n"
-# printf "\nDo not enter a passphrase for a host (server) computer\nPress enter 3 times to accept defaults\n\n"
-# su pshare -c "ssh-keygen -t rsa -b 2048"
-
 ufw logging off
 ufw default deny
 ufw enable

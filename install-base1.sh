@@ -3,113 +3,167 @@
 function uefi-header {
    printf "The EndeavourOS Live install ISO has been started in the UEFI mode\n"
    printf "For a UEFI install, create a gpt partition table with 4 partitions as follows:\n\n"
-
    printf "Partition Table: gpt\n"
    printf "Number  Start   End     Size    File system     Name  Flags\n"
    printf " 1      1074MB  1388MB  315MB   fat32           EFI   boot, esp\n"
    printf " 2      1388MB  2462MB  1074MB  ext4            BOOT\n"
    printf " 3      2462MB  241GB   239GB   ext4            ROOT\n"
    printf " 4      241GB   250GB   8677MB  linux-swap(v1)  SWAP\n\n"
+   printf "Only File Format  ext4 is allowed for /boot and / \n\n"
 }    # end of function uefi-header
 
 function bios-header {
    printf "The EndeavourOS Live install ISO has been started in the msdos mode\n"
    printf "For a msdos install, create a msdos partition table with 3 partitions as follows:\n\n"
-
    printf "Partition Table: msdos\n"
    printf "Number  Start   End     Size    Type     File system  Flags\n"
    printf " 1      1049kb  1075MB	1074MB  primary  ext4         boot\n"
    printf " 2      1075MB  241GB   240GB   primary  ext4\n"
    printf " 3      241GB   250GB   8860MB  primary  linux-swap(v1)\n\n"
+   printf "Only File Format  ext4 is allowed for /boot and / \n\n"
 }     # end of function bios-header
 
-function uefi-instruction {
-   printf "\033c"
-   printf "    Create UEFI partition table on target drive\n\n"
+function headerend {
+   printf "Any deviation from this scheme will result in a non working installation\n"
+   printf "It is up to you to determine the size of each partition.\n\n"
+   prompt="Is your SSD partition table and partitions set properly? [y,n] "
+   simple-yes-no
+   if [ $returnanswer == "n" ] || [ $returnanswer == "N" ]
+   then
+      printf "\n\nPlease partition your drive as described above\nThen restart this script\n"
+      exit
+   fi
+}
 
-   printf "Adjust width and height of this window for best viewing.\n"
-   printf "Start an additional terminal window, for inputting  these instructions.\n\n"
-   printf "$ lsblk     (determine the device name of your mass storage device)\n"
-   printf "$ sudo parted /dev/sda   (or your /dev/name such as /dev/sdb or /dev/nvme0n1) \n"
-   printf "(parted) mklabel gpt      (CAUTION as soon as you press Enter, all data will be gone)\n"
-   printf "(parted) unit mib\n"
-   printf "(parted) print free    (my SSD - Disk /dev/sda: 238475Mib total space. Write that down.\n"
-   printf "                       (and a Partition table: gpt)\n"
-   printf "(parted) mkpart\n"
-   printf "  Partition name? EFI\n"
-   printf "  File system type? fat32\n"
-   printf "  Start? 1024                  (start point of partition in Mib)\n"
-   printf "  End? 1524                    (end point 1524Mib - start point 1024Mib = 500Mib)\n"
-   printf "(parted) set 1 esp on          (sets partition 1 flag to esp)\n"
-   printf "(parted) print                 (check progress so far)\n"
-   printf "(parted) mkpart\n"
-   printf "  Partition name? BOOT\n"
-   printf "  File system type? ext4\n"
-   printf "  Start? 1524                 (start point of part 2 same as end point of part 1)\n"
-   printf "  End? 2548                   ( creates a partition of 2548 - 1524 = 1024 Mib or 1 Gib)\n"
-   printf " print free         (at bottom, note end column of free space - 238475Mib - in my case)\n"
-   printf "                    ( multiply 1024 x 8 = 8192mib for 8Gib of swap. Adjust as needed)\n"      
-   printf "(parted) mkpart\n"
-   printf "   Partition name? ROOT\n"
-   printf "   File system type? ext4\n"
-   printf "   Start? 2548                 (start point of part 3 same as end point of partition 2)\n"
-   printf "   End? 230283           (end of free space 238475Mib - 8192Mib for swap = 230283 for end)\n"    
-   printf "(parted) print free      (should show 8192Mib free space for swap)\n"
-   printf "(parted) mkpart\n"
-   printf "   Partition name: SWAP\n"
-   printf "   File System type: linux-swap\n"
-   printf "   Start? 230283     (start point of part 4 same as end point of part 3 adjust as nesessary)\n"
-   printf "   End? 238475       (end same as end point of Free Space from print free command.)\n"
-   printf "(parted) print       (should be what you want)\n"
-   printf "(parted) quit        (ignore you may need to update /etc/fstab as we haven't made one yet)\n"  
+function uefi-auto-partition {
+ parted --script -a optimal /$devicename \
+   mklabel gpt \
+   unit mib \
+   mkpart EFI fat32 1024MiB 1524MiB \
+   set 1 esp on \
+   mkpart BOOT ext4 1524MiB 2548MiB \
+   mkpart ROOT ext4 2548MiB $endpart2 \
+   mkpart SWAP linux-swap $endpart2 $devicesize \
+   quit 
+ }     # end of function uefi-auto-partition
 
-   printf "\nPress any key to continue "
-   read -n1 x
- }     # end of function uefi-instruction
+function bios-auto-partition {
+parted --script -a optimal /$devicename \
+   mklabel msdos \
+   unit mib \
+   mkpart primary ext4 1024MiB 2048MiB \
+   set 1 boot on \
+   mkpart primary ext4 2048MiB $endpart2 \
+   mkpart primary linux-swap $endpart2 $devicesize \
+   quit   
+}     # end of function bios-auto-partition
 
 
-function bios-instruction {
-   printf "\033c"
-   printf "    Create Bios MBR partition table on target drive\n\n"
+function autopartition  {
+##### Determine device name for auto partition ####
+xyz="0"
+while [ "$xyz" == "0" ]
+do
+    fdisk -l | grep 'Disk /dev/sd\|Disk /dev/nvme\|Disk model' > disks
+    lineno=$(wc -l disks | awk '{print $1}')
+    recordno=$((lineno / 2))
+    printf "\033c"
+    printf "\nDiscovery found the following devices:\n"
+    devno=1
+    while [ $devno -le $recordno ]
+    do
+        printf "\nDevice $devno\n"
+        if [ $devno -eq 1 ]
+        then
+            st=1
+            ((sp=$st+1))  
+        else
+            ((st=$devno+($devno-1))) 
+            ((sp=$st+1)) 
+        fi
+        cat disks | awk -v a="$st" -v b="$sp" 'NR==a,NR==b'
+        ((devno=devno+1)) 
+    done
+    printf "\033c"
+    printf "\nDiscovery found the following devices:\n"
+    devno=1
+    while [ $devno -le $recordno ]
+    do
+        printf "\nDevice $devno\n"
+        if [ $devno -eq 1 ]
+        then
+            st=1
+            ((sp=$st+1))  
+        else
+            ((st=$devno+($devno-1))) 
+            ((sp=$st+1)) 
+        fi
+        cat disks | awk -v a="$st" -v b="$sp" 'NR==a,NR==b'
+        ((devno=devno+1)) 
+    done
+    zyx="0"
+    while [ "$zyx" == "0" ]
+    do
+      printf "\nEnter the device number on which to install OS [1 to $recordno] "
+      read devno
+      if [ "$devno" -eq "$devno" ] 2>/dev/null  
+      then
+         if [ $devno -lt 1 ] || [ $devno -gt $recordno ]
+         then
+            printf "\nYour choice is out of range. Please try again\n"
+         else
+            zyx="1"
+         fi 
+      else
+         printf "\nYour choice is not a number.  Please try again\n"
+      fi
+    done
 
-   printf "Adjust width and height of this window for best viewing.\n"
-   printf "Start an additional terminal window, for inputting these instructions.\n\n"
-   printf "$ lsblk     (determine the device name of your mass storage device)\n"
-   printf "$ sudo parted /dev/sda   (or your /dev/name such as /dev/sdb or /dev/nvme0n1) \n"
-   printf "(parted) mklabel msdos      (CAUTION as soon as you press Enter, all data will be gone)\n"
-   printf "(parted) unit mib\n"
-   printf "(parted) print free    (my SSD - Disk /dev/sda: 238475Mib total space. Write that down.\n"
-   printf "                       (and a Partition table: msdos)\n"
-   printf "(parted) mkpart\n"
-   printf "  Partition type? primary/extended? primary\n"
-   printf "  File system type? ext4\n"
-   printf "  Start? 1024                 (start point of partition in Mib)\n"
-   printf "  End? 2048                   (end point 2048Mib - start point 1024Mib = 1024Mib or 1Gib)\n"
-   printf "(parted) set 1 boot on        (sets partition 1 flag to boot)\n"
-   printf "(parted) print free           (check progress so far (at bottom, note \"end column\" of\n"
-   printf "                              (free space - 238475Mib - in my case))\n"
-   printf "                              (Leave space for swap, 1024 * 8 = 8192 for 8Gib of swap)\n" 
-   printf "(parted) mkpart\n"
-   printf "  Partition type? primary/extended? primary\n"
-   printf "  File system type? ext4\n"
-   printf "  Start? 2048                 (start point of part 2 same as end point of part 1)\n"
-   printf "  End? 230283                 (end of free space 238475Mib - 8192Mib for swap = 230283 for end)\n"
-   printf " print free                   (should show 8192Mib free for swap, note end of free space)\n"
-   printf "(parted) mkpart\n"
-   printf "   Partition type? primary/extended? primary\n"
-   printf "   File System type: linux-swap\n"
-   printf "   Start? 230283     (start point of part 3 same as end point of part 2)\n"
-   printf "   End? 238475       (same as end of Free Space from print free command.)\n"
-   printf "(parted) print       (should be what you want)\n"
-   printf "(parted) quit        (ignore you may need to update /etc/fstab as we haven't made one yet)\n"  
+    if [ $devno -eq 1 ]
+      then
+          st=1
+          ((sp=$st+1))  
+      else
+          ((st=$devno+($devno-1))) 
+          ((sp=$st+1)) 
+    fi
+    cat disks | awk -v a="$st" -v b="$sp" 'NR==a,NR==b' > devinfo
+    devicemodel=$(cat devinfo | grep "Disk model" | sed 's/Disk/Device/')
+    devicename=$(cat devinfo | grep "/dev/" | awk '{print $2}')
+    devicename=${devicename%?}
+    devicesize=$(cat devinfo | grep "/dev/" | awk '{print $3 " " $4}')
+    devicesize=${devicesize%?}
+    printf "\nYou have chosen the following device to recieve the Operating System\n"
+    printf "\n$devicemodel\nDevice name:  $devicename\nDevice size:  $devicesize\n"
+    printf "\nWARNING: Acepting this will remove ALL data on the device\n"
+    prompt="\nDo you accept $devicename as your OS Device? [y,n,q] "
+    simple-yes-no  #function call
+    if [ $returnanswer == "y" ] || [ $returnanswer == "Y" ]
+    then
+      xyz="1"
+    fi
 
-   printf "\nPress any key to continue "
-   read -n1 x
-}     # end of function bios-instruction
+    ##### Determine device size in MiB, and end of root partition ###
+    devicesize=$(cat devinfo | grep $devicename | awk '{print $5}')
+    ((devicesize=$devicesize/1048576))
+    ((endpart2=$devicesize-4096))
+    endpart2=$endpart2"MiB"
+    devicesize=$devicesize"MiB"
+
+    ##### Call appropriate auto partition function ####
+    printf "\033c"
+    printf "\nPartioning $devicename "
+    if [ $uefibootstatus -eq 1 ]
+    then
+      uefi-auto-partition  # function call
+    else
+      bios-auto-partition  # function call
+    fi
+done
+}   # end of function autopartition
 
 
 function format_mount_uefi {
-
 #  format partitions
 
    n=1
@@ -159,7 +213,7 @@ function format_mount_bios {
    n=3
    mkswap $devicename$n
 
-# mount partitions
+#  mount partitions
 
    n=2
    mount $devicename$n /mnt
@@ -283,52 +337,48 @@ NC='\033[0m' # No Color
 # Create log file
 export log="`mktemp`"
 
+##### check to see if script was run as root #####
 if [ $(id -u) -ne 0 ]
 then
    printf "\nPLEASE RUN THIS SCRIPT WITH sudo\n\n"
    exit
 fi
 
-printf "\033c"; printf "\n"
-printf "This script is meant for installation in a \"Bare Metal\" situation.\n"
-printf "It does not provide for dual booting with another OS.\n"
-printf "It assumes that the SSD/HD has been partitioned prior to running this script.\n"
-printf "File Format ext4 is used for /boot and / \n"
-
+##### check to see if ISO was booted in msdos/MBR mode or UEFI #####
 ls /sys/firmware/efi/efivars  > /dev/null 2>/dev/null
-
 if [ $? == "0" ]
 then
    uefibootstatus=1
-   uefi-header     # function call
 else
    uefibootstatus=0
-   bios-header     # function call
 fi
 
-printf "Any deviation from this scheme will result in a non working installation\n"
-printf "It is up to you to determine the size of each partition.\n\n"
-prompt="Do you require assistance with partitioning your Mass Storage Device? [y,n,q] "
+##### Determine if user wants manual partitioning or auto partitioning #####
+printf "\033c"; printf "\n"
+printf "This script is meant for installation in a \"Bare Metal\" situation.\n"
+printf "It does not provide for dual booting with another OS.\n"
+printf "It does not provide for WiFi connections.\n"
+printf "The SSD/HD can be partitioned prior to running this script using GParted.\n"
+printf "Or the SSD/HD can be auto-partitioned by the script.\n"
+prompt="\nDo you want to use auto-partitioning? [y,n,q] "
 simple-yes-no
-
-if [ $returnanswer == "y" ] || [ $returnanswer == "Y" ]
+if [ $returnanswer == "n" ] || [ $returnanswer == "N" ]
 then
-  if [ $uefibootstatus == 1 ]
+  if [ $uefibootstatus -eq 1 ]
   then
-     uefi-instruction
-   else
-     bios-instruction
+     manualpartition=$returnanswer     
+     uefi-header   # function call
+     headerend     # function call
+  else
+     manualpartition=$returnanswer
+     bios-header   # function call
+     headerend     # function call 
   fi
+else
+  autopartition  # function call
 fi
 
-
-prompt="\nIs your SSD partition table and partitions set properly? [y,n] "
-message="\nPlease partition your drive as described above\nThen restart this script\n"
-verify="false"
-yes-no-input       # function call
-
-
-printf "\033c"; printf "\nChecking Internet Connection...   " 
+printf "\nChecking Internet Connection...   " 
 ping -c 3 endeavouros.com -W 5 &> $log
 message="Please verify your internet connection \n"
 ok-nok		# function call
@@ -341,37 +391,7 @@ message="Please verify your internet connection and ntp settings\n"
 ok-nok		# function call
 sleep 1
 
-printf "\n"
 
-
-xyz="0"
-while [ "$xyz" == "0" ]
-do
-   printf "\033c"; printf "\n"
-   lsblk
-
-   printf "\nUse the information from lsblk to determine the device name of your drive\n"
-   printf "Enter in the format of /dev/sda or /dev/sdb or /dev/nvme0n1 or something similar\n\n"
-   prompt="Enter the device name of your drive: "
-   message="\nTry again."
-   verify="true"
-   yes-no-input
-   
-   if [ "${returnanswer:0:5}" != "/dev/" ]
-#   while [ "${return:0:5}" != "/dev/" ]
-   then
-      printf "\nYour answer must be in the format /dev/sda or /dev/sdb or /dev/nvme0n1\n"
-      printf "Try again ... Press any key to continue"
-      read -n1 x
-      xyz="0"
-   else
-      devicename="$returnanswer"
-      xyz="1"
-   fi
-done
-
-
-printf "\033c";
 printf "\nFormatting and Mounting partitions\n"
 if [ $uefibootstatus == 1 ]
 then
