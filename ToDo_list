@@ -1,21 +1,21 @@
 
  [x] Script should check at beginning whether it was run with superuser priviliges
- [ ] 1  PUDGE WORKING ON (1 5 & 7 ARE RELATED) Assistance with parted - count & display how much space you may assign to partitions
+ [X] 1  ON (1 5 & 7 ARE RELATED) Assistance with parted - count & display how much space you may assign to partitions
  [ ] 2  Investigate why in some cases parted is unable to inform kernel of new partition table
  [x] 3  Network connection - create self test and nice output
  [x] 4  NTP - same as above
- [ ] 5 PUDGE WORKING ON  Check if /dev/sdx exist or break script after first failed command
+ [X] 5  Check if /dev/sdx exist or break script after first failed command
  [ ] 6  PATBEL WORKING ON IT Print commands output in nice way
- [ ] 7  PUDGE WORKING ON Automatic partitioning with single question on which device to use - selecting by nice name (e.g. producent and model + /dev/sdx path), with option to choose if you’d like to perform manual install.
- [ ] 8  Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
- [ ] 9  Self check if country code is correct
- [ ] 10  TZ should be selected automatically if there is only one tz in country
+ [X] 7  Automatic partitioning with single question on which device to use - selecting by nice name (e.g. producent and model + /dev/sdx path), with option to choose if you’d like to perform manual install.
+ [X] 8  Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
+ [X] 9  Self check if country code is correct
+ [X] 10  TZ should be selected automatically if there is only one tz in country
  [ ] 11  Tinker on `Is this correct` questions
  [ ] 12  Perform autocheck of mirrorlist and keyring install success.
  [ ] 13  Parse output from pacman 
  [ ] 14  AMENDED BY PUDGE, STILL NEEDS MORE DISCUSSION Why last octet of ip address? and why limited from 100 to 245?
  [ ] 15  PATBEL WORKING ON IT Why after reboot there is start job waiting for /sys/subsystem/net/devices/wlan0 ?
- [ ] 16  Ask user if he would like to install additional packages
+ [X] 16  Ask user if he would like to install additional packages
  
  Bug fixes
  
@@ -23,3 +23,4 @@
             Changed lines (approx 239 & 240) in "setup static IP address with user supplied static IP" section
             from ethernetdevice=$(ip -r | grep "default via" | awk '{print $5)  to ethernetdevice=$(ip r | awk 'NR==1{print $5}')
             from routerip=$(ip r | grep "default via" | awk '{print3}') to routerip=$(ip r | awk 'NR==1{print $3}')
+ TODO list last amended 02/25/2020
