@@ -105,23 +105,7 @@ do
         cat disks | awk -v a="$st" -v b="$sp" 'NR==a,NR==b'
         ((devno=devno+1)) 
     done
-    printf "\033c"
-    printf "\nDiscovery found the following devices:\n"
-    devno=1
-    while [ $devno -le $recordno ]
-    do
-        printf "\nDevice $devno\n"
-        if [ $devno -eq 1 ]
-        then
-            st=1
-            ((sp=$st+1))  
-        else
-            ((st=$devno+($devno-1))) 
-            ((sp=$st+1)) 
-        fi
-        cat disks | awk -v a="$st" -v b="$sp" 'NR==a,NR==b'
-        ((devno=devno+1)) 
-    done
+
     zyx="0"
     while [ "$zyx" == "0" ]
     do
