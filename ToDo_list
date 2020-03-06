@@ -10,10 +10,10 @@
  [X] 8  Country codes should be stripped of entries like ‘posix’ and parsed to more readable format
  [X] 9  Self check if country code is correct
  [X] 10  TZ should be selected automatically if there is only one tz in country
- [ ] 11  Tinker on `Is this correct` questions
- [ ] 12  Perform autocheck of mirrorlist and keyring install success.
+ [X] 11  Tinker on `Is this correct` questions
+ [X ] 12  Perform autocheck of mirrorlist and keyring install success.
  [ ] 13  Parse output from pacman 
- [ ] 14  AMENDED BY PUDGE, STILL NEEDS MORE DISCUSSION Why last octet of ip address? and why limited from 100 to 245?
+ [X] 14  AMENDED BY PUDGE, STILL NEEDS MORE DISCUSSION Why last octet of ip address? and why limited from 100 to 245?
  [ ] 15  PATBEL WORKING ON IT Why after reboot there is start job waiting for /sys/subsystem/net/devices/wlan0 ?
  [X] 16  Ask user if he would like to install additional packages
  
@@ -25,4 +25,7 @@
             from routerip=$(ip r | grep "default via" | awk '{print3}') to routerip=$(ip r | awk 'NR==1{print $3}')
  TODO list last amended 02/25/2020
  
- The install instructions last amended 02/25/2020
+ The install instructions last amended 03/06/2020
+ 
+ Feature added   The script will now optionally partition, format, and mount the DATA device
+ which will be included in the /etc/fstab by the genfstab command.
