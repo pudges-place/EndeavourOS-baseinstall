@@ -27,7 +27,7 @@
  
  The install instructions last amended 03/06/2020
  
- Feature added   The script will now optionally partition, format, and mount the DATA device
+ 03/06/2020 Feature added   The script will now optionally partition, format, and mount the DATA device
  which will be included in the /etc/fstab by the genfstab command.
  
  03/18/2020 Feature added   The script will not allow the user to choose the EndeavourOS ISO device.  Displays error, then allows retry.
